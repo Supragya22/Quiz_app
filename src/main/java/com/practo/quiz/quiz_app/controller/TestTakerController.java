@@ -3,6 +3,8 @@ package com.practo.quiz.quiz_app.controller;
 import com.practo.quiz.quiz_app.model.TestTaker;
 import com.practo.quiz.quiz_app.service.TestTakerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -12,27 +14,43 @@ public class TestTakerController {
     @Autowired
     private TestTakerService testTakerService;
 
-    // Endpoint to start a test for a user
-    @PostMapping("/startTest")
-    public TestTaker startTest(@RequestParam Long userId, @RequestParam Long testId) {
-        return testTakerService.startTest(userId, testId);
+    //Start a test for a user
+    @PostMapping("/start/{userId}/{testId}")
+    public ResponseEntity<TestTaker> startTestForUser(@PathVariable Long userId, @PathVariable Long testId) {
+        TestTaker testTaker = testTakerService.startTest(userId, testId);
+        if (testTaker != null) {
+            return new ResponseEntity<>(testTaker, HttpStatus.CREATED);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    // Endpoint to submit the test for a user
-    @PatchMapping("/submitTest")
-    public TestTaker submitTest(@RequestParam Long userId, @RequestParam Long testId) {
-        return testTakerService.submitTest(userId, testId);
+    //Submit a test for a user
+    @PatchMapping("/submit/{userId}/{testId}")
+    public ResponseEntity<TestTaker> submitTestForUser(@PathVariable Long userId, @PathVariable Long testId) {
+        TestTaker testTaker = testTakerService.submitTest(userId, testId);
+        if (testTaker != null) {
+            return ResponseEntity.ok(testTaker);
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // Test not found or already submitted
     }
 
-    // Endpoint to update an answer for a specific test
-    @PatchMapping("/updateAnswer")
-    public TestTaker updateAnswer(@RequestParam Long userId, @RequestParam Long testId, @RequestParam String answer) {
-        return testTakerService.updateAnswer(userId, testId, answer);
+    //Update an answer for a specific test
+    @PatchMapping("/updateAnswer/{userId}/{testId}")
+    public ResponseEntity<TestTaker> updateUserAnswer(
+            @PathVariable Long userId,
+            @PathVariable Long testId,
+            @RequestParam String answer) {
+        TestTaker testTaker = testTakerService.updateAnswer(userId, testId, answer);
+        if (testTaker != null) {
+            return ResponseEntity.ok(testTaker);
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // Test not found or already submitted
     }
 
-    // Endpoint to calculate the score for a test taker
-    @GetMapping("/calculateScore")
-    public int calculateScore(@RequestParam Long userId, @RequestParam Long testId) {
-        return testTakerService.calculateScore(userId, testId);
+    //Calculate the score for a user
+    @GetMapping("/score/{userId}/{testId}")
+    public ResponseEntity<Integer> calculateUserScore(@PathVariable Long userId, @PathVariable Long testId) {
+        int score = testTakerService.calculateScore(userId, testId);
+        return ResponseEntity.ok(score);
     }
 }

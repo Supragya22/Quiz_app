@@ -1,5 +1,6 @@
 package com.practo.quiz.quiz_app.service;
 
+import com.practo.quiz.quiz_app.model.Question;
 import com.practo.quiz.quiz_app.model.TestTaker;
 import com.practo.quiz.quiz_app.model.User;
 import com.practo.quiz.quiz_app.model.Test;
@@ -52,7 +53,7 @@ public class TestTakerService {
     // Update an answer for a specific question
     public TestTaker updateAnswer(Long userId, Long testId, String answer) {
         TestTaker testTaker = testTakerRepository.findByUserIdAndTestId(userId, testId);
-        
+
         if (testTaker != null && !testTaker.isSubmitted()) {
             List<String> answers = testTaker.getAnswers();
             answers.add(answer); // Assuming answers are stored in the correct order
@@ -70,10 +71,12 @@ public class TestTakerService {
             List<String> answers = testTaker.getAnswers();
             int score = 0;
 
-            // Calculate score based on answers (assuming we compare answers with correct ones)
+            // Retrieve questions directly from the associated test
             Test test = testTaker.getTest();
-            for (int i = 0; i < answers.size(); i++) {
-                if (test.getQuestions().get(i).getCorrectAnswer().equals(answers.get(i))) {
+            List<Question> questions = test.getQuestions();
+
+            for (int i = 0; i < Math.min(answers.size(), questions.size()); i++) {
+                if (questions.get(i).getCorrectAnswer().equals(answers.get(i))) {
                     score++;
                 }
             }

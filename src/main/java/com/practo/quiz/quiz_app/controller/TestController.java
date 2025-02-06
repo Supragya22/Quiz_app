@@ -1,5 +1,6 @@
 package com.practo.quiz.quiz_app.controller;
 
+import com.practo.quiz.quiz_app.model.Question;
 import com.practo.quiz.quiz_app.model.Test;
 import com.practo.quiz.quiz_app.service.TestService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +27,9 @@ public class TestController {
 
     // Endpoint to get all tests
     @GetMapping
-    public List<Test> getAllTests() {
-        return testService.getAllTests();
+    public ResponseEntity<List<Test>> getAllTests() {
+        List<Test> tests = testService.getAllTests();
+        return ResponseEntity.ok(tests);
     }
 
     // Endpoint to get a test by ID
@@ -35,6 +37,16 @@ public class TestController {
     public ResponseEntity<Test> getTestById(@PathVariable Long id) {
         Optional<Test> test = testService.getTestById(id);
         return test.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    //New Endpoint: Get questions for a specific test
+    @GetMapping("/{id}/questions")
+    public ResponseEntity<List<Question>> getQuestionsByTestId(@PathVariable Long id) {
+        List<Question> questions = testService.getQuestionsByTestId(id);
+        if (questions != null && !questions.isEmpty()) {
+            return ResponseEntity.ok(questions);
+        }
+        return ResponseEntity.notFound().build();  // No questions found
     }
 
     // Endpoint to update a test by ID

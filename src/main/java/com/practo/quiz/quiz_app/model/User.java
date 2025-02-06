@@ -18,11 +18,12 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     private String username;
     private String password;
     private String role;  // Either "ROLE_ADMIN" or "ROLE_TEST_TAKER"
-    
+
     @ElementCollection(fetch = FetchType.EAGER)
     private List<String> authorities;  // A list to store user permissions
 }
+

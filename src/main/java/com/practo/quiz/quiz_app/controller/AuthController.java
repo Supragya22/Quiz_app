@@ -4,7 +4,13 @@ import com.practo.quiz.quiz_app.model.User;
 import com.practo.quiz.quiz_app.security.JwtUtil;
 import com.practo.quiz.quiz_app.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
@@ -16,15 +22,26 @@ public class AuthController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
+
     @PostMapping("/login")
-    public String login(@RequestBody User user) {
+    public ResponseEntity<?> login(@RequestBody User user) {
         // Find the user by username
         User foundUser = userRepository.findByUsername(user.getUsername());
-        if (foundUser != null && foundUser.getPassword().equals(user.getPassword())) {
-            // If user exists and passwords match, generate and return JWT token
-            return jwtUtil.generateToken(user.getUsername());
-        } else {
-            return "Invalid credentials!";  // Return error if invalid credentials
+
+        if (foundUser != null && passwordEncoder.matches(user.getPassword(), foundUser.getPassword())) {
+            // Generate JWT token with username and role
+            String token = jwtUtil.generateToken(foundUser.getUsername(), foundUser.getRole());
+
+            // Return token in response
+            Map<String, Object> response = new HashMap<>();
+            response.put("token", token);
+            response.put("role", foundUser.getRole());
+            response.put("username", foundUser.getUsername());
+
+            return ResponseEntity.ok(response);
         }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials!");
     }
 }

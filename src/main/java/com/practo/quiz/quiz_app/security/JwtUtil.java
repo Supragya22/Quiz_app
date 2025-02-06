@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class JwtUtil {
@@ -20,9 +22,13 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
-    // Method to generate JWT Token
-    public String generateToken(String username) {
+    // Generate JWT Token with role included
+    public String generateToken(String username, String role) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("role", role);  // Store role in JWT claims
+
         return Jwts.builder()
+                .setClaims(claims)
                 .setSubject(username)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1 hour expiration
@@ -30,41 +36,46 @@ public class JwtUtil {
                 .compact();
     }
 
-    // Method to extract username from the token
+    // Extract username from the token
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
-    // Method to extract any claim
+    // Extract role from the token
+    public String extractRole(String token) {
+        return extractClaim(token, claims -> claims.get("role", String.class));
+    }
+
+    // Extract expiration date from the token
+    public Date extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
+    }
+
+    // Extract any claim from the token
     private <T> T extractClaim(String token, ClaimsResolver<T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.resolve(claims);
     }
 
-    // Method to extract all claims from the token
+    // Extract all claims from the token
     private Claims extractAllClaims(String token) {
-        return Jwts.parser() // Updated parserBuilder
-                .setSigningKey(getKey()) // Set the secret key
+        return Jwts.parser()  // Fix: Use parserBuilder()
+                .setSigningKey(getKey())
                 .build()
-                .parseClaimsJws(token) // Parse the claims JWS (JWT)
+                .parseClaimsJws(token)
                 .getBody();
     }
 
-    // Method to validate the token
+    // Validate if the token is expired
     public Boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
-    // Method to extract expiration date from the token
-    public Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
-    }
-
-    // Method to check if the token is valid
+    // Validate the token
     public Boolean validateToken(String token, String username) {
         return (username.equals(extractUsername(token)) && !isTokenExpired(token));
     }
-    
+
     // Functional interface for claims extraction
     @FunctionalInterface
     public interface ClaimsResolver<T> {
