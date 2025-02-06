@@ -1,8 +1,8 @@
 package com.practo.quiz.quiz_app.controller;
 
-import com.yourcompany.quiz.model.User;
-import com.yourcompany.quiz.security.JwtUtil;
-import com.yourcompany.quiz.repository.UserRepository;
+import com.practo.quiz.quiz_app.model.User;
+import com.practo.quiz.quiz_app.security.JwtUtil;
+import com.practo.quiz.quiz_app.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
