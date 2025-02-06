@@ -21,7 +21,7 @@ public class User {
 
     private String username;
     private String password;
-    private String role;  // Either "ROLE_ADMIN" or "ROLE_TEST_TAKER"
+    private String role;  // Either "ADMIN" or "ROLE_TEST_TAKER"
 
     @ElementCollection(fetch = FetchType.EAGER)
     private List<String> authorities;  // A list to store user permissions

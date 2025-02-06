@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -20,6 +21,14 @@ public class UserService {
     // Register a new user
     public User registerUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword())); // Encrypt password
+        if ("ROLE_ADMIN".equals(user.getRole())) {
+            user.setAuthorities(Collections.singletonList(user.getRole())); // Ensure role is added to authorities
+        } else if ("ROLE_TEST_TAKER".equals(user.getRole())) {
+            user.setAuthorities(Collections.singletonList(user.getRole())); // Ensure role is added to authorities
+        } else {
+            throw new IllegalArgumentException("Invalid role");
+        }
+
         return userRepository.save(user);
     }
 
