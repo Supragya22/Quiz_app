@@ -1,60 +1,73 @@
 package com.practo.quiz.quiz_app.security;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import javax.crypto.SecretKey;
 import java.util.Date;
-import java.util.function.Function;
 
 @Component
 public class JwtUtil {
 
     @Value("${jwt.secret}")
-    private String SECRET_KEY;
-    // Generate a token
+    private String secretKey;
+
+    private SecretKey getKey() {
+        return Keys.hmacShaKeyFor(secretKey.getBytes());
+    }
+
+    // Method to generate JWT Token
     public String generateToken(String username) {
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))  // 10 hours expiration
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1 hour expiration
+                .signWith(getKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    // Extract username from the token
+    // Method to extract username from the token
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
-    // Extract any claim
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+    // Method to extract any claim
+    private <T> T extractClaim(String token, ClaimsResolver<T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
-        return claimsResolver.apply(claims);
+        return claimsResolver.resolve(claims);
     }
 
-    // Extract all claims
+    // Method to extract all claims from the token
     private Claims extractAllClaims(String token) {
-        return Jwts.parser()
-                .setSigningKey(SECRET_KEY)
-                .parseClaimsJws(token)
+        return Jwts.parser() // Updated parserBuilder
+                .setSigningKey(getKey()) // Set the secret key
+                .build()
+                .parseClaimsJws(token) // Parse the claims JWS (JWT)
                 .getBody();
     }
 
-    // Validate token expiration
+    // Method to validate the token
     public Boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
-    // Extract expiration date
-    private Date extractExpiration(String token) {
+    // Method to extract expiration date from the token
+    public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    // Validate the token
+    // Method to check if the token is valid
     public Boolean validateToken(String token, String username) {
         return (username.equals(extractUsername(token)) && !isTokenExpired(token));
     }
+    
+    // Functional interface for claims extraction
+    @FunctionalInterface
+    public interface ClaimsResolver<T> {
+        T resolve(Claims claims);
+    }
 }
-
