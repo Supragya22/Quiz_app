@@ -1,6 +1,6 @@
 package com.practo.quiz.quiz_app.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

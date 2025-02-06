@@ -1,13 +1,13 @@
 package com.practo.quiz.quiz_app.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "test")
+@Table(name = "question")
 @Data
 @Builder
 @NoArgsConstructor
