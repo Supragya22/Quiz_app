@@ -14,6 +14,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
+@CrossOrigin(origins = "http://localhost:3000")
 public class AuthController {
 
     @Autowired
@@ -28,6 +29,8 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User user) {
         // Find the user by username
+        System.out.println("entering controller");
+        System.out.println("user"+user);
         User foundUser = userRepository.findByUsername(user.getUsername());
 
         if (foundUser != null && passwordEncoder.matches(user.getPassword(), foundUser.getPassword())) {

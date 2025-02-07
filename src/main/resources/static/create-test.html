@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Test</title>
+  <link rel="stylesheet" href="styles/create-test.css">
+</head>
+<body>
+<div class="container">
+  <h2>Create New Test</h2>
+  <form id="createTestForm">
+    <label for="testName">Test Name:</label>
+    <input type="text" id="testName" required>
+
+    <label for="testDescription">Test Description:</label>
+    <textarea id="testDescription" required></textarea>
+
+    <label for="startTime">Start Time:</label>
+    <input type="datetime-local" id="startTime" required>
+
+    <label for="endTime">End Time:</label>
+    <input type="datetime-local" id="endTime" required>
+
+    <button type="submit">Create Test</button>
+  </form>
+  <p id="message"></p>
+  <a href="admin-dashboard.html">Back to Dashboard</a>
+</div>
+
+<script src="scripts/create-test.js"></script>
+</body>
+</html>

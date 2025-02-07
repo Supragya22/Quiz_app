@@ -1,0 +1,24 @@
+<!-- quiz.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <link rel="stylesheet" href="styles/styles.css">
+  </head>
+  <body>
+    <h2>Quiz</h2>
+    <button onclick="logout()">Logout</button>
+    <div id="quiz-container">
+      <p id="question"></p>
+      <div id="options"></div>
+      <button onclick="prevQuestion()">Previous</button>
+      <button onclick="nextQuestion()">Next</button>
+      <button onclick="submitTest()">Submit Test</button>
+    </div>
+    <p id="quiz-message"></p>
+
+    <script src="scripts/app.js"></script>
+  </body>
+</html>
