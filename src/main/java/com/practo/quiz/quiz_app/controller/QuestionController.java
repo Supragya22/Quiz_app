@@ -1,6 +1,10 @@
 package com.practo.quiz.quiz_app.controller;
 
 import com.practo.quiz.quiz_app.model.Question;
+import com.practo.quiz.quiz_app.model.Test;
+import com.practo.quiz.quiz_app.model.User;
+import com.practo.quiz.quiz_app.repository.UserRepository;
+import com.practo.quiz.quiz_app.security.JwtUtil;
 import com.practo.quiz.quiz_app.service.QuestionService;
 import com.practo.quiz.quiz_app.service.TestService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +16,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/questions")
-@CrossOrigin(origins = "http://localhost:3000")
 public class QuestionController {
 
     @Autowired
@@ -21,11 +24,35 @@ public class QuestionController {
     @Autowired
     private TestService testService;
 
-    // Create a new question (no longer associated with a test here)
-    @PostMapping
-    public ResponseEntity<Question> createQuestion(@RequestBody Question question) {
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @PostMapping("/create")
+    public ResponseEntity<?> createQuestion(@RequestHeader("Authorization") String token,
+                                            @RequestBody Question question) {
+        if (token == null || !token.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Missing or invalid token");
+        }
+
+        String username = jwtUtil.extractUsername(token.substring(7));
+
+        User admin = userRepository.findByUsername(username);
+        if (admin == null || !admin.getRole().equals("ROLE_ADMIN")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied. Not an Admin");
+        }
+
+        // Ensure the admin_id is set
+        question.setCreatedBy(admin);
+
         Question createdQuestion = questionService.createQuestion(question);
+
+        System.out.println("Controller QUESTIONS: " + question);
+
         return new ResponseEntity<>(createdQuestion, HttpStatus.CREATED);
+
     }
 
     // Get all questions for a specific test (moved logic to TestService)
@@ -39,18 +66,31 @@ public class QuestionController {
     }
 
     // Get all questions
-    @GetMapping
-    public List<Question> getAllQuestions() {
-        return questionService.getAllQuestions();
+    @GetMapping("/my-questions")
+    public ResponseEntity<List<Question>> getMyQuestions(@RequestHeader("Authorization") String token) {
+        String username = jwtUtil.extractUsername(token.substring(7));
+        User admin = userRepository.findByUsername(username);
+        List<Question> questions = questionService.getQuestionsByAdmin(admin.getId());
+        return ResponseEntity.ok(questions);
     }
+
 
     // Delete a question by ID
     @DeleteMapping("/{questionId}")
-    public ResponseEntity<Void> deleteQuestion(@PathVariable Long questionId) {
-        boolean isDeleted = questionService.deleteQuestion(questionId);
-        if (isDeleted) {
-            return ResponseEntity.noContent().build();
+    public ResponseEntity<String> deleteQuestion(@RequestHeader("Authorization") String token,
+                                                 @PathVariable Long questionId) {
+        String username = jwtUtil.extractUsername(token.substring(7));
+        User admin = userRepository.findByUsername(username);
+
+        if (admin == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
-        return ResponseEntity.notFound().build();  // Question not found
+
+        boolean deleted = questionService.deleteQuestion(questionId, admin.getId());
+        if (deleted) {
+            return ResponseEntity.ok("Question deleted successfully.");
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You can only delete your own questions.");
+        }
     }
 }

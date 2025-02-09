@@ -1,10 +1,11 @@
 package com.practo.quiz.quiz_app.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
+import java.util.List;
 
 @Entity
 @Table(name = "questions")
@@ -14,6 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Question {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,67 +23,28 @@ public class Question {
     private String questionText;
 
     private String option1;
+
     private String option2;
+
     private String option3;
+
     private String option4;
 
-    private String correctAnswer;
+    private int correctOptionIndex;
 
-    // Getters and Setters
+    @ManyToOne
+    @JoinColumn(name = "admin_id", nullable = false)
+    private User createdBy;
 
-    public Long getId() {
-        return id;
-    }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @ManyToOne(fetch = FetchType.LAZY) // Set to LAZY to prevent automatic loading
+    @JoinColumn(name = "test_id")
+    @JsonIgnore  // Prevent infinite recursion
+    private Test test;
 
-    public String getQuestionText() {
-        return questionText;
-    }
+    @ManyToMany(mappedBy = "questions")
+    @JsonBackReference
+    @JsonIgnore
+    private List<Test> tests;
 
-    public void setQuestionText(String questionText) {
-        this.questionText = questionText;
-    }
-
-    public String getOption1() {
-        return option1;
-    }
-
-    public void setOption1(String option1) {
-        this.option1 = option1;
-    }
-
-    public String getOption2() {
-        return option2;
-    }
-
-    public void setOption2(String option2) {
-        this.option2 = option2;
-    }
-
-    public String getOption3() {
-        return option3;
-    }
-
-    public void setOption3(String option3) {
-        this.option3 = option3;
-    }
-
-    public String getOption4() {
-        return option4;
-    }
-
-    public void setOption4(String option4) {
-        this.option4 = option4;
-    }
-
-    public String getCorrectAnswer() {
-        return correctAnswer;
-    }
-
-    public void setCorrectAnswer(String correctAnswer) {
-        this.correctAnswer = correctAnswer;
-    }
 }
