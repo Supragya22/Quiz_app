@@ -41,6 +41,15 @@ public class JwtUtil {
         return extractClaim(token, Claims::getSubject);
     }
 
+    // Extract User ID from the token (assuming the username in token is the user ID)
+//    public Long extractUserId(String token) {
+//        try {
+//            return Long.parseLong(extractUsername(token)); // Convert extracted username to Long (if username is userId)
+//        } catch (NumberFormatException e) {
+//            throw new RuntimeException("Invalid token: User ID is not a valid number", e);
+//        }
+//    }
+
     // Extract role from the token
     public String extractRole(String token) {
         return extractClaim(token, claims -> claims.get("role", String.class));

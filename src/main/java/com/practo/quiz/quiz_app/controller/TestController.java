@@ -5,6 +5,7 @@ import com.practo.quiz.quiz_app.model.*;
 import com.practo.quiz.quiz_app.repository.UserRepository;
 import com.practo.quiz.quiz_app.security.JwtUtil;
 import com.practo.quiz.quiz_app.service.TestService;
+import com.practo.quiz.quiz_app.service.TestTakerService;
 import io.jsonwebtoken.MalformedJwtException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,9 @@ public class TestController {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    TestTakerService testTakerService;
 
     // Endpoint to create a new test
     @PostMapping
@@ -142,5 +146,23 @@ public class TestController {
                     .body("An error occurred while deleting the test.");
         }
     }
+
+    @PutMapping("/{testId}/assign/{userId}")
+    public ResponseEntity<String> assignTest(@PathVariable Long testId, @PathVariable Long userId, @RequestHeader("Authorization") String token) {
+
+        String username = jwtUtil.extractUsername(token.substring(7));
+        User admin = userRepository.findByUsername(username);
+        Long adminId = admin.getId();
+
+        Optional<Test> testOpt = testService.getTestById(testId);
+
+        if (testOpt.isEmpty() || !testOpt.get().getCreatedBy().getId().equals(adminId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized to assign this test");
+        }
+
+        String response = testTakerService.assignTest(userId, testId);
+        return ResponseEntity.ok(response);
+    }
+
 
 }

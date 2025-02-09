@@ -1,90 +1,152 @@
-//package com.practo.quiz.quiz_app.service;
-//
-//import com.practo.quiz.quiz_app.model.Question;
-//import com.practo.quiz.quiz_app.model.TestTaker;
-//import com.practo.quiz.quiz_app.model.User;
-//import com.practo.quiz.quiz_app.model.Test;
-//import com.practo.quiz.quiz_app.repository.TestTakerRepository;
-//import com.practo.quiz.quiz_app.repository.TestRepository;
-//import com.practo.quiz.quiz_app.repository.UserRepository;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.stereotype.Service;
-//
-//import java.util.List;
-//
-//@Service
-//public class TestTakerService {
-//
-//    @Autowired
-//    private TestTakerRepository testTakerRepository;
-//
-//    @Autowired
-//    private TestRepository testRepository;
-//
-//    @Autowired
-//    private UserRepository userRepository;
-//
-//    // Start a test for a test taker
-//    public TestTaker startTest(Long userId, Long testId) {
-//        Test test = testRepository.findById(testId).orElse(null);
-//        User user = userRepository.findById(userId).orElse(null);
-//
-//        if (test != null && user != null) {
-//            TestTaker testTaker = new TestTaker();
-//            testTaker.setUser(user);
-//            testTaker.setTest(test);
-//            testTaker.setAnswers(List.of()); // Initialize with empty answers
-//            return testTakerRepository.save(testTaker);
-//        }
-//        return null;
-//    }
-//
-//    // Submit the test
-//    public TestTaker submitTest(Long userId, Long testId) {
-//        TestTaker testTaker = testTakerRepository.findByUserIdAndTestId(userId, testId);
-//
-//        if (testTaker != null && !testTaker.isSubmitted()) {
-//            testTaker.setSubmitted(true);
-//            return testTakerRepository.save(testTaker);
-//        }
-//        return null;
-//    }
-//
-//    // Update an answer for a specific question
-//    public TestTaker updateAnswer(Long userId, Long testId, Integer answer) {
-//        TestTaker testTaker = testTakerRepository.findByUserIdAndTestId(userId, testId);
-//
-//        if (testTaker != null && !testTaker.isSubmitted()) {
-//            List<Integer> answers = testTaker.getAnswers();
-//            answers.add(answer); // Assuming answers are stored in the correct order
-//            testTaker.setAnswers(answers);
-//            return testTakerRepository.save(testTaker);
-//        }
-//        return null;
-//    }
-//
-//    // Calculate the score for a test taker
-//    public int calculateScore(Long userId, Long testId) {
-//        TestTaker testTaker = testTakerRepository.findByUserIdAndTestId(userId, testId);
-//
-//        if (testTaker != null && testTaker.isSubmitted()) {
-//            List<Integer> answers = testTaker.getAnswers();
-//            int score = 0;
-//
-//            // Retrieve questions directly from the associated test
-//            Test test = testTaker.getTest();
-//            List<Question> questions = test.getQuestions();
-//
-//            for (int i = 0; i < Math.min(answers.size(), questions.size()); i++) {
-//                if (questions.get(i).getCorrectOptionIndex()==(answers.get(i))) {
-//                    score++;
-//                }
-//            }
-//            return score;
-//        }
-//        return 0;
-//    }
-//
-//    public boolean isTestAssignedToUser(Long testId, Long id) {
-//    }
-//}
+package com.practo.quiz.quiz_app.service;
+
+import com.practo.quiz.quiz_app.model.*;
+import com.practo.quiz.quiz_app.repository.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Service
+public class TestTakerService {
+
+    @Autowired
+    private TestTakerRepository testTakerRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private TestRepository testRepository;
+
+    @Autowired
+    private QuestionRepository questionRepository;
+
+    @Autowired
+    private AnswerRepository answerRepository;
+
+    /**
+     * Assigns a test to a user.
+     */
+    public String assignTest(Long userId, Long testId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Test test = testRepository.findById(testId)
+                .orElseThrow(() -> new RuntimeException("Test not found"));
+
+        if (testTakerRepository.findByUserIdAndTestId(userId, testId).isPresent()) {
+            return "Test already assigned to the user.";
+        }
+
+        TestTaker testTaker = new TestTaker(user, test);
+        testTakerRepository.save(testTaker);
+        return "Test assigned successfully.";
+    }
+
+    /**
+     * Retrieves all assigned tests for a user.
+     */
+    public List<Test> getAssignedTests(Long userId) {
+        return testTakerRepository.findAssignedTestsByUserId(userId);
+    }
+
+    /**
+     * Retrieves the ongoing test for a user.
+     */
+    public Optional<TestTaker> getOngoingTest(Long userId) {
+        return testTakerRepository.findOngoingTestByUserId(userId);
+    }
+
+    /**
+     * Starts a test by retrieving all questions for the assigned test.
+     */
+    public List<Question> startTest(Long userId, Long testId) {
+        return testTakerRepository.findByUserIdAndTestId(userId, testId)
+                .map(testTaker -> questionRepository.findByTestId(testId))
+                .orElseThrow(() -> new RuntimeException("Test not assigned to the user."));
+    }
+
+    /**
+     * Submits a test and calculates the score.
+     */
+    public String submitTest(Long userId, Long testId, List<Answer> answers) {
+        System.out.println("TEST TAKER SERVICE: SUBMIT TEST: " + userId + " " + testId + " " + answers);
+
+        TestTaker testTaker = testTakerRepository.findByUserIdAndTestId(userId, testId)
+                .orElseThrow(() -> new RuntimeException("Test not found for this user."));
+
+        if (testTaker.isSubmitted()) {
+            return "Test already submitted.";
+        }
+
+        // Fetch full Question objects and correct answers
+        Map<Long, Integer> correctAnswers = questionRepository.findByTestId(testId)
+                .stream()
+                .collect(Collectors.toMap(Question::getId, Question::getCorrectOptionIndex));
+
+        System.out.println("TEST TAKER: CORRECT ANSWERS: " + correctAnswers);
+
+        for (Answer answer : answers) {
+            if (answer.getQuestion() == null || answer.getQuestion().getId() == null) {
+                throw new RuntimeException("Invalid question reference in the answer.");
+            }
+
+            // Fetch the full Question object
+            Question question = questionRepository.findById(answer.getQuestion().getId())
+                    .orElseThrow(() -> new RuntimeException("Question not found."));
+
+            // Validate selected option
+            boolean isCorrect = correctAnswers.getOrDefault(question.getId(), -1) == answer.getSelectedOption();
+
+            // Ensure Answer object is fully populated
+            answer.setUser(testTaker.getUser());
+            answer.setTest(testTaker.getTest());
+            answer.setTestTaker(testTaker);
+            answer.setQuestion(question);
+            answer.setCorrect(isCorrect);
+        }
+
+        answerRepository.saveAll(answers);
+
+        // Calculate and save the score
+        int score = calculateScore(testId, answers);
+        testTaker.setScore(score);
+        testTaker.setSubmitted(true);
+        testTakerRepository.save(testTaker);
+
+        return "Test submitted successfully. Your score: " + score;
+    }
+
+    /**
+     * Calculates the total score for the test.
+     */
+    private int calculateScore(Long testId, List<Answer> answers) {
+        Map<Long, Integer> correctAnswers = questionRepository.findByTestId(testId)
+                .stream()
+                .collect(Collectors.toMap(Question::getId, Question::getCorrectOptionIndex));
+
+        return (int) answers.stream()
+                .filter(answer -> {
+                    Integer correctOption = correctAnswers.get(answer.getQuestion().getId());
+                    return correctOption != null && correctOption == answer.getSelectedOption();
+                })
+                .count();
+    }
+
+    /**
+     * Retrieves the test result for a user.
+     */
+    public Map<String, Object> getTestResult(Long userId, Long testId) {
+        TestTaker testTaker = testTakerRepository.findByUserIdAndTestId(userId, testId)
+                .orElseThrow(() -> new RuntimeException("Test result not found."));
+
+        return Map.of(
+                "testId", testId,
+                "userId", userId,
+                "score", testTaker.getScore(),
+                "submitted", testTaker.isSubmitted()
+        );
+    }
+}

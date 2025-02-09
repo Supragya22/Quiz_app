@@ -30,6 +30,7 @@ public class Question {
 
     private String option4;
 
+    @JsonIgnore
     private int correctOptionIndex;
 
     @ManyToOne
@@ -46,5 +47,16 @@ public class Question {
     @JsonBackReference
     @JsonIgnore
     private List<Test> tests;
+
+    @JsonIgnore
+    public String getCorrectOption() {
+        return switch (correctOptionIndex) {
+            case 1 -> option1;
+            case 2 -> option2;
+            case 3 -> option3;
+            case 4 -> option4;
+            default -> null; // Handle invalid index cases
+        };
+    }
 
 }

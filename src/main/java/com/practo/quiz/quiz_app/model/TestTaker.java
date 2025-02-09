@@ -1,18 +1,17 @@
 package com.practo.quiz.quiz_app.model;
 
 import jakarta.persistence.*;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "testTakers")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "test_takers")
 public class TestTaker {
 
     @Id
@@ -20,18 +19,22 @@ public class TestTaker {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private User user;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user; // Test-taker
 
     @ManyToOne
-    @JoinColumn(name = "test_id", referencedColumnName = "id")
+    @JoinColumn(name = "test_id", nullable = false)
     private Test test;
 
-//    @ElementCollection(fetch = FetchType.LAZY)
-//    @CollectionTable(name = "test_taker_answers", joinColumns = @JoinColumn(name = "test_taker_id"))
-//    @Column(name = "answer")
-//    @OneToMany(mappedBy = "testTaker", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-//    private List<Integer> answers;
+    private boolean submitted; // Tracks if the test is submitted
+    private Integer score; // Stores the score
 
-    private boolean submitted;
+    public TestTaker(User user, Test test) {
+        this.user = user;
+        this.test = test;
+        this.submitted = false;
+        this.score = 0;
+    }
+
+    // Getters and Setters
 }
