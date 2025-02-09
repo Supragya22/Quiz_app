@@ -1,5 +1,6 @@
 async function loadTests() {
-    const response = await fetch("http://localhost:8080/api/tests", {
+    const response = await fetch("http://localhost:8080/api/tests/my-tests", {
+    method: "GET",
         headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
     });
 

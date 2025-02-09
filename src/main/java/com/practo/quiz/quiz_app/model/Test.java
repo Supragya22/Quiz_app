@@ -1,6 +1,8 @@
 package com.practo.quiz.quiz_app.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import java.time.LocalDateTime;
 import jakarta.persistence.*;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -24,9 +26,11 @@ public class Test {
 
     private String description;
 
-    private Long startTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime startTime;
 
-    private Long endTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime endTime;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(

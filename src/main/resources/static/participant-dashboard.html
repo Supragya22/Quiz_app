@@ -3,15 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Participant Dashboard</title>
-  <link rel="stylesheet" href="styles/styles.css">
+  <title>Test Page</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div class="container">
-  <h2>Available Tests</h2>
-  <div id="availableTests"></div>
-  <button onclick="logout()">Logout</button>
+
+<div id="test-container">
+  <h2>Welcome, Test-Taker</h2>
+
+  <div id="test-list">
+    <h3>Assigned Tests</h3>
+    <ul id="assigned-tests"></ul>
+  </div>
+
+  <div id="test-section" style="display:none;">
+    <h3 id="test-title"></h3>
+    <p id="timer"></p>
+    <div id="question-container"></div>
+    <button onclick="submitTest()">Submit Test</button>
+  </div>
+
+  <div id="score-section" style="display:none;">
+    <h3>Your Score:</h3>
+    <p id="score"></p>
+  </div>
 </div>
-<script src="scripts/app.js"></script>
+
+<script src="scripts/participant-dashboard.js"></script>
 </body>
 </html>
