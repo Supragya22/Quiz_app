@@ -53,6 +53,8 @@ public class TestController {
             // Set the admin as the creator
             test.setCreatedBy(admin);
 
+            test.updateIsActive();
+
             // Save test
             Test createdTest = testService.createTest(test);
             return new ResponseEntity<>(createdTest, HttpStatus.CREATED);

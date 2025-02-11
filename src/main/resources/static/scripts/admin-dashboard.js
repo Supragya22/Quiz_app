@@ -5,12 +5,13 @@ async function loadTests() {
     });
 
     const tests = await response.json();
+    console.log("TEST INFO: ", tests);
     const tbody = document.getElementById("testsTable").querySelector("tbody");
     tbody.innerHTML = "";
 
     tests.forEach(test => {
         const row = tbody.insertRow();
-        row.innerHTML = `<td>${test.name}</td><td>${test.description}</td><td>${test.is_active ? "Active" : "Inactive"}</td>`;
+        row.innerHTML = `<td>${test.name}</td><td>${test.description}</td><td>${test.active ? "Active" : "Inactive"}</td>`;
     });
 }
 async function createTest() {
@@ -30,5 +31,13 @@ async function addTestTakers() {
     loadTests();
 }
 
+function logout() {
+    // Clear any authentication tokens or session storage
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("username");
+    sessionStorage.clear();
 
+    // Redirect to login page
+    window.location.href = "index.html";
+  }
 window.onload = loadTests;

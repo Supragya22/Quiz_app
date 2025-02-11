@@ -46,4 +46,9 @@ public class Test {
     @ManyToOne
     @JoinColumn(name ="admin_id", nullable=false)
     private User createdBy;
+
+    public void updateIsActive() {
+        LocalDateTime now = LocalDateTime.now();
+        this.isActive = (startTime != null && endTime != null) && now.isAfter(startTime) && now.isBefore(endTime);
+    }
 }

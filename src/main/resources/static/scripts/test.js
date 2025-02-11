@@ -335,4 +335,7 @@ function closePopup() {
 function logout() {
     localStorage.clear();
     window.location.href = "index.html";
+    setTimeout(() => {
+        location.reload(true); // Force reload from the server
+    }, 100);
 }

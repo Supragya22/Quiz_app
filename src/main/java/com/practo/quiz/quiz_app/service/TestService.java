@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,6 +32,8 @@ public class TestService {
         if (test.getEndTime().isBefore(test.getStartTime())) {
             throw new IllegalArgumentException("End time must be after start time. Please enter a valid time.");
         }
+        // Determine isActive before saving the test
+        test.updateIsActive();
         return testRepository.save(test);
     }
 

@@ -81,5 +81,15 @@ async function viewScore(testId) {
     }
 }
 
+function logout() {
+    // Clear any authentication tokens or session storage
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("username");
+    sessionStorage.clear();
+
+    // Redirect to login page
+    window.location.href = "index.html";
+  }
+
 // Fetch tests on page load
 window.onload = fetchAssignedTests;
