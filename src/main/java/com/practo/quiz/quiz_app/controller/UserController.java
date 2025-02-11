@@ -1,6 +1,6 @@
 package com.practo.quiz.quiz_app.controller;
 
-import com.practo.quiz.quiz_app.dto.userDTO;
+import com.practo.quiz.quiz_app.dto.UserDTO;
 import com.practo.quiz.quiz_app.model.User;
 import com.practo.quiz.quiz_app.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ public class UserController {
         if (userService.userExists(user.getUsername())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username already exists.");
         }
-        userDTO registeredUser = userService.registerUser(user);
+        UserDTO registeredUser = userService.registerUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(registeredUser);
     }
 

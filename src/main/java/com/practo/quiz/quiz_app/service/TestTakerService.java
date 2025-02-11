@@ -1,5 +1,6 @@
 package com.practo.quiz.quiz_app.service;
 
+import com.practo.quiz.quiz_app.dto.TestTakerDTO;
 import com.practo.quiz.quiz_app.model.*;
 import com.practo.quiz.quiz_app.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,23 +54,88 @@ public class TestTakerService {
     /**
      * Starts a test by retrieving all questions for the assigned test.
      */
+//    public List<Question> startTest(Long userId, Long testId) {
+//        return testTakerRepository.findByUserIdAndTestId(userId, testId)
+//                .map(testTaker -> questionRepository.findByTestId(testId))
+//                .orElseThrow(() -> new RuntimeException("Test not assigned to the user."));
+//    }
     public List<Question> startTest(Long userId, Long testId) {
-        return testTakerRepository.findByUserIdAndTestId(userId, testId)
-                .map(testTaker -> questionRepository.findByTestId(testId))
+        TestTaker testTaker = testTakerRepository.findByUserIdAndTestId(userId, testId)
                 .orElseThrow(() -> new RuntimeException("Test not assigned to the user."));
+
+        // Prevent test from being restarted if already submitted
+        if (testTaker.isSubmitted()) {
+            throw new RuntimeException("Test already submitted. You cannot start it again.");
+        }
+
+        return questionRepository.findByTestId(testId);
     }
 
     /**
      * Submits a test and calculates the score.
      */
-    public String submitTest(Long userId, Long testId, List<Answer> answers) {
+//    public TestTakerDTO submitTest(Long userId, Long testId, List<Answer> answers) {
+//        System.out.println("TEST TAKER SERVICE: SUBMIT TEST: " + userId + " " + testId + " " + answers);
+//
+//        TestTaker testTaker = testTakerRepository.findByUserIdAndTestId(userId, testId)
+//                .orElseThrow(() -> new RuntimeException("Test not found for this user."));
+//
+//        if (testTaker.isSubmitted()) {
+//            return new TestTakerDTO();
+//        }
+//
+//        // Fetch full Question objects and correct answers
+//        Map<Long, Integer> correctAnswers = questionRepository.findByTestId(testId)
+//                .stream()
+//                .collect(Collectors.toMap(Question::getId, Question::getCorrectOptionIndex));
+//
+//        System.out.println("TEST TAKER: CORRECT ANSWERS: " + correctAnswers);
+//
+//        for (Answer answer : answers) {
+//            if (answer.getQuestion() == null || answer.getQuestion().getId() == null) {
+//                throw new RuntimeException("Invalid question reference in the answer.");
+//            }
+//
+//            // Fetch the full Question object
+//            Question question = questionRepository.findById(answer.getQuestion().getId())
+//                    .orElseThrow(() -> new RuntimeException("Question not found."));
+//
+//            // Validate selected option
+//            boolean isCorrect = correctAnswers.getOrDefault(question.getId(), -1) == answer.getSelectedOption();
+//
+//            // Ensure Answer object is fully populated
+//            answer.setUser(testTaker.getUser());
+//            answer.setTest(testTaker.getTest());
+//            answer.setTestTaker(testTaker);
+//            answer.setQuestion(question);
+//            answer.setCorrect(isCorrect);
+//        }
+//
+//        answerRepository.saveAll(answers);
+//
+//        // Calculate and save the score
+//        int score = calculateScore(testId, answers);
+//        testTaker.setScore(score);
+//        testTaker.setSubmitted(true);
+//        testTakerRepository.save(testTaker);
+//
+//        TestTakerDTO testTakerDTO = new TestTakerDTO();
+//        testTakerDTO.setUserId(userId);
+//        testTakerDTO.setTest(testTaker.getTest().getId());
+//        testTakerDTO.setScore(score);
+//
+//        return testTakerDTO;
+//    }
+
+    public TestTakerDTO submitTest(Long userId, Long testId, List<Answer> answers) {
         System.out.println("TEST TAKER SERVICE: SUBMIT TEST: " + userId + " " + testId + " " + answers);
 
         TestTaker testTaker = testTakerRepository.findByUserIdAndTestId(userId, testId)
                 .orElseThrow(() -> new RuntimeException("Test not found for this user."));
 
+        // Prevent duplicate submissions
         if (testTaker.isSubmitted()) {
-            return "Test already submitted.";
+            throw new RuntimeException("Test already submitted. You cannot submit again.");
         }
 
         // Fetch full Question objects and correct answers
@@ -107,8 +173,14 @@ public class TestTakerService {
         testTaker.setSubmitted(true);
         testTakerRepository.save(testTaker);
 
-        return "Test submitted successfully. Your score: " + score;
+        TestTakerDTO testTakerDTO = new TestTakerDTO();
+        testTakerDTO.setUserId(userId);
+        testTakerDTO.setTest(testTaker.getTest().getId());
+        testTakerDTO.setScore(score);
+
+        return testTakerDTO;
     }
+
 
     private int calculateScore(Long testId, List<Answer> answers) {
         Map<Long, Integer> correctAnswers = questionRepository.findByTestId(testId)
@@ -126,15 +198,17 @@ public class TestTakerService {
     /**
      * Retrieves the test result for a user.
      */
-    public Map<String, Object> getTestResult(Long userId, Long testId) {
+    public TestTakerDTO getTestResult(Long userId, Long testId) {
         TestTaker testTaker = testTakerRepository.findByUserIdAndTestId(userId, testId)
                 .orElseThrow(() -> new RuntimeException("Test result not found."));
 
-        return Map.of(
-                "testId", testId,
-                "userId", userId,
-                "score", testTaker.getScore(),
-                "submitted", testTaker.isSubmitted()
-        );
+
+        TestTakerDTO testTakerDTO = new TestTakerDTO();
+        testTakerDTO.setTest(testId);
+        testTakerDTO.setScore(testTaker.getScore());
+        testTakerDTO.setSubmitted(testTaker.isSubmitted());
+        testTakerDTO.setUserId(userId);
+
+        return testTakerDTO;
     }
 }

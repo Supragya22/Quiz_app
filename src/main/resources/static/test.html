@@ -8,11 +8,15 @@
 </head>
 <body>
 <h2>Quiz</h2>
-<button onclick="logout()">Logout</button>
-<p id="timer"></p>
+<div id="logout-timer">
+  <button id="logout" onclick="logout()">Logout</button>
+  <p id="timer"></p>
+</div>
 <div id="quiz-container">
   <p id="question"></p>
   <div id="options"></div>
+</div>
+<div>
   <button onclick="prevQuestion()">Previous</button>
   <button onclick="nextQuestion()">Next</button>
   <button onclick="submitTest()">Submit Test</button>

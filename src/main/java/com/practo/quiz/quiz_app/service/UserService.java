@@ -1,6 +1,6 @@
 package com.practo.quiz.quiz_app.service;
 
-import com.practo.quiz.quiz_app.dto.userDTO;
+import com.practo.quiz.quiz_app.dto.UserDTO;
 import com.practo.quiz.quiz_app.model.User;
 import com.practo.quiz.quiz_app.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,7 @@ public class UserService {
     private BCryptPasswordEncoder passwordEncoder;
 
     // Register a new user
-    public userDTO registerUser(User user) {
+    public UserDTO registerUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword())); // Encrypt password
         if ("ROLE_ADMIN".equals(user.getRole())) {
             user.setAuthorities(Collections.singletonList(user.getRole())); // Ensure role is added to authorities
@@ -32,7 +32,7 @@ public class UserService {
 
         userRepository.save(user);
 
-        userDTO myuser = new userDTO();
+        UserDTO myuser = new UserDTO();
         myuser.setId(user.getId());
         myuser.setUsername(user.getUsername());
         myuser.setRole(user.getRole());

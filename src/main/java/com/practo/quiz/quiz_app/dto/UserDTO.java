@@ -3,7 +3,7 @@ package com.practo.quiz.quiz_app.dto;
 import lombok.Data;
 
 @Data
-public class userDTO {
+public class UserDTO {
 
     private Long id;
     private String username;

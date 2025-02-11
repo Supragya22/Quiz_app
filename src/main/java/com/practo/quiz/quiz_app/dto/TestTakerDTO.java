@@ -9,10 +9,12 @@ import java.time.LocalDateTime;
 @Data
 public class TestTakerDTO {
 
-    private Long id;
+    private Long test;
 
-    private Test test;
+    private Long userId;
 
     private Integer score;
+
+    private Boolean submitted;
 
 }
