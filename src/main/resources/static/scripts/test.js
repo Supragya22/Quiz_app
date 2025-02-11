@@ -1,32 +1,73 @@
-// app.js
-
-let testId = localStorage.getItem("currentTestId");
-let userId = localStorage.getItem("userId");
+const API_BASE_URL = "http://localhost:8080";
+let testId = localStorage.getItem("testId");
+let userId = localStorage.getItem("id");
 let token = localStorage.getItem("token");
 let questions = [];
 let currentQuestionIndex = 0;
-let endTime = null; // Stores test end time
+let endTime = null;
+let timerInterval = null;
 
 document.addEventListener("DOMContentLoaded", () => {
-    fetchTestDetails();
+    startTestOnLoad(); // Start test when test.html loads
 });
 
-// Fetch test details including start and end time
-function fetchTestDetails() {
-    fetch(`/api/tests/${testId}`, {
+// Start the test when test.html loads
+async function startTestOnLoad() {
+    if (!testId || !userId || !token) {
+        console.error("Missing testId, userId, or token!");
+        return;
+    }
+
+    fetch(`${API_BASE_URL}/api/test-takers/${userId}/start-test/${testId}`, {
+            method: "GET",
+            headers: { "Authorization": `Bearer ${token}` }
+        })
+        .then(response => response.json())
+        .then(data => {
+            questions = data;
+            if (questions.length === 0) {
+                alert("No questions available for this test.");
+                return;
+            }
+
+            fetchTestEndTime();
+            displayQuestion();
+        })
+        .catch(error => console.error("Error fetching test details:", error));
+}
+
+// Fetch test questions
+//function fetchTestDetails() {
+//    fetch(`${API_BASE_URL}/api/test-takers/${userId}/start-test/${testId}`, {
+//        method: "GET",
+//        headers: { "Authorization": `Bearer ${token}` }
+//    })
+//    .then(response => response.json())
+//    .then(data => {
+//        questions = data;
+//        if (questions.length === 0) {
+//            alert("No questions available for this test.");
+//            return;
+//        }
+//
+//        fetchTestEndTime();
+//        displayQuestion();
+//    })
+//    .catch(error => console.error("Error fetching test details:", error));
+//}
+
+// Fetch test end time for countdown timer
+function fetchTestEndTime() {
+    fetch(`${API_BASE_URL}/api/tests/${testId}`, {
         method: "GET",
-        headers: {
-            "Authorization": `Bearer ${token}`
-        }
+        headers: { "Authorization": `Bearer ${token}` }
     })
     .then(response => response.json())
     .then(data => {
-        questions = data.questions;
-        endTime = new Date(data.endTime).getTime(); // Convert to timestamp
-        displayQuestion();
+        endTime = new Date(data.endTime).getTime();
         startTimer();
     })
-    .catch(error => console.error("Error fetching test details:", error));
+    .catch(error => console.error("Error fetching test end time:", error));
 }
 
 // Display the current question
@@ -42,7 +83,14 @@ function displayQuestion() {
     [questionData.option1, questionData.option2, questionData.option3, questionData.option4].forEach((option, index) => {
         let optionButton = document.createElement("button");
         optionButton.innerText = option;
+        optionButton.classList.add("option-button");
         optionButton.onclick = () => saveAnswer(questionData.id, index + 1);
+
+        let savedAnswer = localStorage.getItem(`answer_${questionData.id}`);
+        if (savedAnswer && parseInt(savedAnswer) === index + 1) {
+            optionButton.style.backgroundColor = "lightblue";
+        }
+
         optionsDiv.appendChild(optionButton);
     });
 }
@@ -50,103 +98,43 @@ function displayQuestion() {
 // Save user's selected answer
 function saveAnswer(questionId, selectedOption) {
     localStorage.setItem(`answer_${questionId}`, selectedOption);
+    displayQuestion();
 }
 
-// Navigate to previous question
-function prevQuestion() {
-    if (currentQuestionIndex > 0) {
-        currentQuestionIndex--;
-        displayQuestion();
-    }
-}
-
-// Navigate to next question
-function nextQuestion() {
-    if (currentQuestionIndex < questions.length - 1) {
-        currentQuestionIndex++;
-        displayQuestion();
-    }
-}
+// Navigate questions
+function prevQuestion() { if (currentQuestionIndex > 0) currentQuestionIndex--; displayQuestion(); }
+function nextQuestion() { if (currentQuestionIndex < questions.length - 1) currentQuestionIndex++; displayQuestion(); }
 
 // Submit test manually
 function submitTest() {
-    let answers = [];
-
-    questions.forEach(q => {
+    let answers = questions.map(q => {
         let savedAnswer = localStorage.getItem(`answer_${q.id}`);
-        if (savedAnswer) {
-            answers.push({ questionId: q.id, selectedOption: parseInt(savedAnswer) });
-        }
-    });
+        return savedAnswer ? { question: q.id, selectedOption: parseInt(savedAnswer) } : null;
+    }).filter(a => a !== null);
 
-    fetch(`/api/tests/${testId}/submit`, {
+    fetch(`${API_BASE_URL}/api/test-takers/${userId}/submit-test/${testId}`, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({ userId, answers })
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify(answers)
     })
-    .then(response => response.json())
-    .then(() => {
-        fetchTestResult(); // Fetch and display score after submission
-    })
+    .then(() => { clearInterval(timerInterval); fetchTestResult(); })
     .catch(error => console.error("Error submitting test:", error));
 }
 
-// Fetch test score after submission
+// Fetch and display test score
 function fetchTestResult() {
-    fetch(`/api/tests/${userId}/test-result/${testId}`, {
+    fetch(`${API_BASE_URL}/api/test-takers/${userId}/test-result/${testId}`, {
         method: "GET",
-        headers: {
-            "Authorization": `Bearer ${token}`
-        }
+        headers: { "Authorization": `Bearer ${token}` }
     })
     .then(response => response.json())
-    .then(data => {
-        showPopup(data.score); // Show popup with score
-    })
+    .then(data => showPopup(data.score))
     .catch(error => console.error("Error fetching test result:", error));
 }
 
-// Show popup box with score
-function showPopup(score) {
-    let popup = document.getElementById("popup-box");
-    let popupMessage = document.getElementById("popup-message");
-    popupMessage.innerHTML = `Your Score: <b>${score}</b>`;
-    popup.style.display = "block";
-}
+// Show popup with score
+function showPopup(score) { document.getElementById("popup-message").innerHTML = `Your Score: <b>${score}</b>`; document.getElementById("popup-box").style.display = "block"; }
+function closePopup() { document.getElementById("popup-box").style.display = "none"; window.location.href = "participant-dashboard.html"; }
 
-// Close the popup
-function closePopup() {
-    document.getElementById("popup-box").style.display = "none";
-    window.location.href = "participant-dashboard.html"; // Redirect back to dashboard
-}
-
-// Start the countdown timer based on start and end time
-function startTimer() {
-    let timerDisplay = document.getElementById("timer");
-
-    let timerInterval = setInterval(() => {
-        let now = new Date().getTime();
-        let timeLeft = endTime - now;
-
-        if (timeLeft <= 0) {
-            clearInterval(timerInterval);
-            alert("Time is up! Submitting test...");
-            submitTest();
-            return;
-        }
-
-        let minutes = Math.floor(timeLeft / 60000);
-        let seconds = Math.floor((timeLeft % 60000) / 1000);
-
-        timerDisplay.innerText = `Time Left: ${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
-    }, 1000);
-}
-
-// Logout function
-function logout() {
-    localStorage.clear();
-    window.location.href = "index.html";
-}
+// Logout
+function logout() { localStorage.clear(); window.location.href = "index.html"; }

@@ -1,64 +1,85 @@
-document.addEventListener("DOMContentLoaded", () => {
-    fetchAssignedTests();
-    setInterval(fetchAssignedTests, 60000); // Auto-refresh every 60 seconds
-});
+const API_BASE_URL = "http://localhost:8080";
+const userId = localStorage.getItem("id");
+const token = localStorage.getItem("token");
 
-// Fetch assigned tests
-function fetchAssignedTests() {
-    let userId = localStorage.getItem("userId");
-    let token = localStorage.getItem("token");
 
-    fetch(`/api/tests/assigned/${userId}`, {
-        method: "GET",
-        headers: {
-            "Authorization": `Bearer ${token}`
+// Redirect to login if user is not authenticated
+if (!token) {
+    window.location.href = "index.html";
+}
+
+// Set the username
+document.getElementById("username").textContent = localStorage.getItem("username");
+
+// Fetch and display assigned tests
+async function fetchAssignedTests() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/test-takers/${userId}/tests`, {
+            method: "GET",
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch assigned tests");
         }
-    })
-    .then(response => response.json())
-    .then(tests => {
-        let testList = document.getElementById("assigned-tests");
-        testList.innerHTML = "";
 
-        if (tests.length === 0) {
-            testList.innerHTML = "<p>No assigned tests available.</p>";
-            return;
-        }
+        const tests = await response.json();
+        const testsBody = document.getElementById("testsBody");
+        testsBody.innerHTML = "";
 
         tests.forEach(test => {
-            let listItem = document.createElement("li");
-            let statusText = test.isActive ? "Active" : "Inactive";
-            let statusClass = test.isActive ? "active" : "inactive";
+            const row = document.createElement("tr");
 
-            listItem.innerHTML = `
-                ${test.testName} - <span class="${statusClass}">${statusText}</span>
-                ${test.isActive ? `<button onclick="startTest(${test.id})">Start Test</button>` : ""}
+            // Check if test is active
+            const isActive = new Date(test.startTime) <= new Date() && new Date(test.endTime) > new Date();
+
+            row.innerHTML = `
+                <td>${test.name}</td>
+                <td>${new Date(test.startTime).toLocaleString()}</td>
+                <td>${new Date(test.endTime).toLocaleString()}</td>
+                <td>${isActive ? "Active" : "Inactive"}</td>
+                <td>
+                    <button onclick="startTest(${test.id})" ${!isActive ? "disabled" : ""}>Start Test</button>
+                </td>
+                <td>
+                    <button onclick="viewScore(${test.id})">View Score</button>
+                </td>
             `;
 
-            testList.appendChild(listItem);
+            testsBody.appendChild(row);
         });
-    })
-    .catch(error => console.error("Error fetching assigned tests:", error));
+
+    } catch (error) {
+        console.error("Error fetching tests:", error);
+    }
 }
 
-// Function to start test
+// Start test
 function startTest(testId) {
-    let userId = localStorage.getItem("userId");
-    let token = localStorage.getItem("token");
-
-    fetch(`/api/test-takers/${userId}/start-test/${testId}`, {
-        method: "GET",
-        headers: {
-            "Authorization": `Bearer ${token}`
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            localStorage.setItem("currentTestId", testId);
-            window.location.href = "test.html"; // Redirect to test page
-        } else {
-            alert("Failed to start the test. Please try again.");
-        }
-    })
-    .catch(error => console.error("Error starting test:", error));
+    console.log("Redirecting to test.html with Test ID:", testId);
+    localStorage.setItem("testId", testId);
+    window.location.href = "test.html";
 }
+
+// View score
+async function viewScore(testId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/test-takers/${userId}/test-result/${testId}`, {
+            method: "GET",
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch test result");
+        }
+
+        const data = await response.json();
+        alert(`Your score: ${data.score}`);
+
+    } catch (error) {
+        console.error("Error fetching score:", error);
+    }
+}
+
+// Fetch tests on page load
+window.onload = fetchAssignedTests;

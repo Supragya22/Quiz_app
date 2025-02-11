@@ -7,20 +7,24 @@
   <link rel="stylesheet" href="styles/participant-dashboard.css">
 </head>
 <body>
+<div class="container">
+  <h2>Welcome, <span id="username"></span>!</h2>
+  <h3>Your Assigned Tests</h3>
 
-<div id="test-container">
-  <h2>Welcome, Test-Taker</h2>
-
-  <div id="test-list">
-    <h3>Assigned Tests</h3>
-    <ul id="assigned-tests"></ul>
-  </div>
-
-  <div id="action-buttons">
-    <button id="start-test-btn" disabled>Start Test</button>
-    <button id="view-score-btn" disabled>View Score</button>
-  </div>
-
+  <table id="testsTable">
+    <thead>
+    <tr>
+      <th>Test Name</th>
+      <th>Start Time</th>
+      <th>End Time</th>
+      <th>Status</th>
+      <th>Action</th>
+      <th>Score</th>
+    </tr>
+    </thead>
+    <tbody id="testsBody">
+    </tbody>
+  </table>
 </div>
 
 <script src="scripts/participant-dashboard.js"></script>

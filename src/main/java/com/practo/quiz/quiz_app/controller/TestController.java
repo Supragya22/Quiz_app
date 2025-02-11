@@ -119,7 +119,9 @@ public class TestController {
     //New Endpoint: Get questions for a specific test
     @GetMapping("/{id}/questions")
     public ResponseEntity<List<Question>> getQuestionsByTestId(@PathVariable Long id) {
+        System.out.println("Fetched Questions");  // Debug log
         List<Question> questions = testService.getQuestionsByTestId(id);
+        System.out.println("Fetched Questions: " + questions);  // Debug log
         if (questions != null && !questions.isEmpty()) {
             return ResponseEntity.ok(questions);
         }

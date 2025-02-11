@@ -82,6 +82,6 @@ function assignTestTaker() {
         document.getElementById("message").style.color = "red";
     });
 }
-
+assignButton.removeEventListener("click", assignTestTaker)
 // Attach event listener to button
 document.getElementById("assignTestButton").addEventListener("click", assignTestTaker);

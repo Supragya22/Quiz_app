@@ -34,10 +34,18 @@ button:hover {
     border-radius: 10px;
 }
 
-#options {
+#options1 {
     margin-top: 10px;
 }
-
+#options2 {
+    margin-top: 10px;
+}
+#options3 {
+    margin-top: 10px;
+}
+#options4 {
+    margin-top: 10px;
+}
 #timer {
     font-size: 18px;
     font-weight: bold;
