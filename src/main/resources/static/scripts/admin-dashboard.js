@@ -13,21 +13,22 @@ async function loadTests() {
         row.innerHTML = `<td>${test.name}</td><td>${test.description}</td><td>${test.is_active ? "Active" : "Inactive"}</td>`;
     });
 }
-
 async function createTest() {
-    const testName = prompt("Enter test name:");
-    const testDescription = prompt("Enter test description:");
-
-    await fetch("http://localhost:8080/api/tests", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${localStorage.getItem("token")}`
-        },
-        body: JSON.stringify({ name: testName, description: testDescription, is_active: true })
-    });
-
+    window.location.href = "create-test.html";
     loadTests();
 }
+async function createQuestion() {
+    window.location.href = "create-question.html";
+    loadTests();
+}
+async function addQuestions() {
+    window.location.href = "add-question.html";
+    loadTests();
+}
+async function addTestTakers() {
+    window.location.href = "add-test-taker.html";
+    loadTests();
+}
+
 
 window.onload = loadTests;

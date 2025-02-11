@@ -4,11 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard</title>
-<!--  <link rel="stylesheet" href="styles/admin-dashboard.css">-->
+  <link rel="stylesheet" href="styles/admin-dashboard.css">
 </head>
 <body>
 <h1>Admin Dashboard</h1>
-<button onclick="createTest()">Create New Test</button>
+
+<div class="button-container">
+  <button onclick="createTest()">Create New Test</button>
+  <button onclick="createQuestion()">Create Question</button>
+  <button onclick="addQuestions()">Add Questions to Test</button>
+  <button onclick="addTestTakers()">Add Test-Takers</button>
+  <button onclick="viewScores()">View Scores</button>
+</div>
+
 <table id="testsTable">
   <thead>
   <tr>
@@ -19,6 +27,7 @@
   </thead>
   <tbody></tbody>
 </table>
+
 <script src="scripts/admin-dashboard.js"></script>
 </body>
 </html>

@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Test Page</title>
-  <link rel="stylesheet" href="styles.css">
+  <title>Participant Dashboard</title>
+  <link rel="stylesheet" href="styles/participant-dashboard.css">
 </head>
 <body>
 
@@ -16,17 +16,11 @@
     <ul id="assigned-tests"></ul>
   </div>
 
-  <div id="test-section" style="display:none;">
-    <h3 id="test-title"></h3>
-    <p id="timer"></p>
-    <div id="question-container"></div>
-    <button onclick="submitTest()">Submit Test</button>
+  <div id="action-buttons">
+    <button id="start-test-btn" disabled>Start Test</button>
+    <button id="view-score-btn" disabled>View Score</button>
   </div>
 
-  <div id="score-section" style="display:none;">
-    <h3>Your Score:</h3>
-    <p id="score"></p>
-  </div>
 </div>
 
 <script src="scripts/participant-dashboard.js"></script>

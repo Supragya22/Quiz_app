@@ -40,9 +40,6 @@ public class Test {
     )
     private List<Question> questions;
 
-//    @OneToMany(fetch = FetchType.LAZY)
-////    @JoinColumn(name = "test_id")
-//    private List<Question> questions;
 
     private boolean isActive;
 

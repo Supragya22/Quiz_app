@@ -27,9 +27,6 @@ public class TestTakerService {
     @Autowired
     private AnswerRepository answerRepository;
 
-    /**
-     * Assigns a test to a user.
-     */
     public String assignTest(Long userId, Long testId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -45,16 +42,10 @@ public class TestTakerService {
         return "Test assigned successfully.";
     }
 
-    /**
-     * Retrieves all assigned tests for a user.
-     */
     public List<Test> getAssignedTests(Long userId) {
         return testTakerRepository.findAssignedTestsByUserId(userId);
     }
 
-    /**
-     * Retrieves the ongoing test for a user.
-     */
     public Optional<TestTaker> getOngoingTest(Long userId) {
         return testTakerRepository.findOngoingTestByUserId(userId);
     }
@@ -119,9 +110,6 @@ public class TestTakerService {
         return "Test submitted successfully. Your score: " + score;
     }
 
-    /**
-     * Calculates the total score for the test.
-     */
     private int calculateScore(Long testId, List<Answer> answers) {
         Map<Long, Integer> correctAnswers = questionRepository.findByTestId(testId)
                 .stream()

@@ -21,12 +21,6 @@ public class TestTakerController {
         this.testTakerService = testTakerService;
     }
 
-//    @PutMapping("/{userId}/assign-test/{testId}")
-//    public ResponseEntity<String> assignTest(@PathVariable Long userId, @PathVariable Long testId) {
-//        String response = testTakerService.assignTest(userId, testId);
-//        return ResponseEntity.ok(response);
-//    }
-
     @GetMapping("/{userId}/tests")
     public ResponseEntity<List<Test>> getAssignedTests(@PathVariable Long userId) {
         return ResponseEntity.ok(testTakerService.getAssignedTests(userId));

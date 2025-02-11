@@ -1,0 +1,50 @@
+* styles/add-questions.css */
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    padding: 20px;
+}
+
+h1, h2 {
+    color: #333;
+}
+
+label {
+    font-weight: bold;
+}
+
+select {
+    margin-bottom: 20px;
+    padding: 5px;
+}
+
+#questionsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.question-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+button {
+    background-color: #007BFF;
+    color: white;
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#message {
+    margin-top: 20px;
+    font-weight: bold;
+}

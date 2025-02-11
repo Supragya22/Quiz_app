@@ -1,5 +1,6 @@
 package com.practo.quiz.quiz_app.service;
 
+import com.practo.quiz.quiz_app.dto.userDTO;
 import com.practo.quiz.quiz_app.model.User;
 import com.practo.quiz.quiz_app.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,7 @@ public class UserService {
     private BCryptPasswordEncoder passwordEncoder;
 
     // Register a new user
-    public User registerUser(User user) {
+    public userDTO registerUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword())); // Encrypt password
         if ("ROLE_ADMIN".equals(user.getRole())) {
             user.setAuthorities(Collections.singletonList(user.getRole())); // Ensure role is added to authorities
@@ -29,7 +30,14 @@ public class UserService {
             throw new IllegalArgumentException("Invalid role");
         }
 
-        return userRepository.save(user);
+        userRepository.save(user);
+
+        userDTO myuser = new userDTO();
+        myuser.setId(user.getId());
+        myuser.setUsername(user.getUsername());
+        myuser.setRole(user.getRole());
+
+        return myuser;
     }
 
     // Check if username exists
@@ -42,6 +50,9 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    public List<User> getUsersByRole(String role) {
+        return userRepository.findByRole(role);
+    }
     // Get a user by ID
     public User getUserById(Long id) {
         return userRepository.findById(id).orElse(null);

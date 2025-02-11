@@ -50,7 +50,6 @@ public class TestController {
             if (admin == null || !admin.getRole().equals("ROLE_ADMIN")) {
                 return new ResponseEntity<>("Access Denied", HttpStatus.FORBIDDEN);
             }
-
             // Set the admin as the creator
             test.setCreatedBy(admin);
 
@@ -58,7 +57,11 @@ public class TestController {
             Test createdTest = testService.createTest(test);
             return new ResponseEntity<>(createdTest, HttpStatus.CREATED);
 
-        } catch (MalformedJwtException e) {
+        }
+        catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+            catch (MalformedJwtException e) {
             return new ResponseEntity<>("Malformed JWT Token", HttpStatus.UNAUTHORIZED);
         } catch (Exception e) {
             return new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -125,12 +128,18 @@ public class TestController {
 
     // Endpoint to update a test by ID
     @PutMapping("/{id}")
-    public ResponseEntity<Test> updateTest(@PathVariable Long id, @RequestBody Test updatedTest) {
-        Test test = testService.updateTest(id, updatedTest);
-        if (test != null) {
-            return ResponseEntity.ok(test);
+    public ResponseEntity<?> updateTest(@PathVariable Long id, @RequestBody Test updatedTest) {
+        try
+        {
+            Test test = testService.updateTest(id, updatedTest);
+            if (test != null) {
+                return ResponseEntity.ok(test);
+            }
+            return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.notFound().build();
+        catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 
     // Endpoint to delete a test by ID

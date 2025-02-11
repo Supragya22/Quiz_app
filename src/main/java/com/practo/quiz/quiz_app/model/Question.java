@@ -38,9 +38,9 @@ public class Question {
     private User createdBy;
 
 
-    @ManyToOne(fetch = FetchType.LAZY) // Set to LAZY to prevent automatic loading
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "test_id")
-    @JsonIgnore  // Prevent infinite recursion
+    @JsonIgnore
     private Test test;
 
     @ManyToMany(mappedBy = "questions")

@@ -28,6 +28,9 @@ public class TestService {
 
     // Create a new test
     public Test createTest(Test test) {
+        if (test.getEndTime().isBefore(test.getStartTime())) {
+            throw new IllegalArgumentException("End time must be after start time. Please enter a valid time.");
+        }
         return testRepository.save(test);
     }
 
@@ -81,6 +84,9 @@ public class TestService {
     // Update a test
     public Test updateTest(Long id, Test updatedTest) {
         Optional<Test> existingTest = testRepository.findById(id);
+        if (updatedTest.getEndTime().isBefore(updatedTest.getStartTime())) {
+            throw new IllegalArgumentException("End time must be after start time. Please enter a valid time.");
+        }
         if (existingTest.isPresent()) {
             Test test = existingTest.get();
             test.setName(updatedTest.getName());
@@ -106,21 +112,5 @@ public class TestService {
 
         testRepository.delete(test);
     }
-//    public void assignTestToTestTakers(Long testId, List<Long> testTakerIds) {
-//        Test test = testRepository.findById(testId).orElseThrow(() -> new RuntimeException("Test not found"));
-//
-//        for (Long testTakerId : testTakerIds) {
-//            TestTaker testTaker = testTakerRepository.findById(testTakerId)
-//                    .orElseThrow(() -> new RuntimeException("TestTaker not found"));
-//            testTaker.getAssignedTests().add(test);
-//            testTakerRepository.save(testTaker);
-//        }
-//    }
-
-    // Fetch all test-takers assigned to a test
-//    public List<TestTaker> getAssignedTestTakers(Long testId) {
-//        Test test = testRepository.findById(testId).orElseThrow(() -> new RuntimeException("Test not found"));
-//        return testTakerRepository.findByAssignedTests(test);
-//    }
 
 }
