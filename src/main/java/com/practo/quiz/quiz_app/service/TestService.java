@@ -1,8 +1,12 @@
 package com.practo.quiz.quiz_app.service;
 
+import com.practo.quiz.quiz_app.dto.TestScoreDTO;
+import com.practo.quiz.quiz_app.dto.TestTakerDTO;
+import com.practo.quiz.quiz_app.model.Answer;
 import com.practo.quiz.quiz_app.model.Test;
 import com.practo.quiz.quiz_app.model.Question;
 import com.practo.quiz.quiz_app.model.TestTaker;
+import com.practo.quiz.quiz_app.repository.AnswerRepository;
 import com.practo.quiz.quiz_app.repository.TestRepository;
 import com.practo.quiz.quiz_app.repository.QuestionRepository;
 import com.practo.quiz.quiz_app.repository.TestTakerRepository;
@@ -14,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class TestService {
@@ -27,6 +32,8 @@ public class TestService {
     @Autowired
     private TestTakerRepository testTakerRepository;
 
+    @Autowired
+    private AnswerRepository answerRepository;
     // Create a new test
     public Test createTest(Test test) {
         if (test.getEndTime().isBefore(test.getStartTime())) {
@@ -115,5 +122,16 @@ public class TestService {
 
         testRepository.delete(test);
     }
+
+    //modifications
+    public List<TestScoreDTO> getTestScores(Long testId) {
+        List<TestTaker> testTakers = testTakerRepository.findAllByTestId(testId);
+
+        return testTakers.stream()
+                .map(tt -> new TestScoreDTO(tt.getUser().getId(), tt.getUser().getUsername(), tt.getScore()))
+                .collect(Collectors.toList());
+    }
+
+
 
 }

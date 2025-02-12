@@ -11,7 +11,11 @@ async function loadTests() {
 
     tests.forEach(test => {
         const row = tbody.insertRow();
-        row.innerHTML = `<td>${test.name}</td><td>${test.description}</td><td>${test.active ? "Active" : "Inactive"}</td>`;
+        row.innerHTML = `<td>${test.name}</td>
+        <td>${test.description}</td>
+        <td>${test.active ? "Active" : "Inactive"}</td>
+        <td> <button onclick="viewScores(${test.id})">View Scores</button>
+        </td>`;
     });
 }
 async function createTest() {
@@ -30,7 +34,10 @@ async function addTestTakers() {
     window.location.href = "add-test-taker.html";
     loadTests();
 }
-
+async function viewScores(testId) {
+    localStorage.setItem("selectedTestId", testId);
+    window.location.href = "result.html";
+}
 function logout() {
     // Clear any authentication tokens or session storage
     localStorage.removeItem("authToken");

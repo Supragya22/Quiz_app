@@ -1,5 +1,7 @@
 package com.practo.quiz.quiz_app.controller;
 
+import com.practo.quiz.quiz_app.dto.TestScoreDTO;
+import com.practo.quiz.quiz_app.dto.TestTakerDTO;
 import com.practo.quiz.quiz_app.model.Question;
 import com.practo.quiz.quiz_app.model.*;
 import com.practo.quiz.quiz_app.repository.UserRepository;
@@ -176,6 +178,19 @@ public class TestController {
         String response = testTakerService.assignTest(userId, testId);
         return ResponseEntity.ok(response);
     }
+
+    //modifications
+    @GetMapping("/{testId}/scores")
+    public ResponseEntity<List<TestScoreDTO>> getTestScores(@PathVariable Long testId) {
+        List<TestScoreDTO> scores = testService.getTestScores(testId);
+
+        if (scores.isEmpty()) {
+            return ResponseEntity.noContent().build(); // Return 204 No Content if no scores
+        }
+
+        return ResponseEntity.ok(scores);
+    }
+
 
 
 }

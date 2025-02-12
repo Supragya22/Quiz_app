@@ -2,12 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Results</title>
-<!--  <link rel="stylesheet" href="styles/results.css">-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Scores</title>
+  <link rel="stylesheet" href="styles/result.css">
 </head>
 <body>
-<h1>Your Score</h1>
-<p id="score"></p>
-<script src="scripts/results.js"></script>
+<h1>Test Scores</h1>
+<table id="scoreTable">
+  <thead>
+  <tr>
+    <th>Test-Taker</th>
+    <th>Score</th>
+  </tr>
+  </thead>
+  <tbody id="scoreTableBody"></tbody>
+</table>
+<script src="scripts/result.js"></script>
 </body>
 </html>
